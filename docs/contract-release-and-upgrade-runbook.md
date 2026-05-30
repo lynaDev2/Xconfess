@@ -269,6 +269,65 @@ Replace:
 4. Writes deployment metadata to `deployments/testnet.json` (or `<network>.json`)
 5. Returns exit code 0 on success
 
+### Deployment metadata format
+
+The canonical deploy script writes a JSON file with these top-level fields:
+
+- `generated_at_utc` — UTC timestamp when the deployment metadata file was created
+- `network` — network name passed to `--network`
+- `target` — compilation target used for the deployed WASM artifacts
+- `contracts` — object keyed by contract crate name
+
+Each contract object contains:
+
+- `contract_id` — deployed Stellar contract ID
+- `source` — Stellar CLI key alias used for deployment
+- `version` — crate version from `Cargo.toml`
+- `wasm_file` — relative path to the deployed WASM artifact
+- `sha256` — SHA-256 hash of the deployed WASM artifact
+
+Example `deployments/testnet.json` shape:
+
+```json
+{
+  "generated_at_utc": "2026-05-30T12:00:00Z",
+  "network": "testnet",
+  "target": "wasm32-unknown-unknown",
+  "contracts": {
+    "confession-anchor": {
+      "contract_id": "CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "source": "xconfess-deployer",
+      "version": "0.1.0",
+      "wasm_file": "target/wasm32-unknown-unknown/release/confession_anchor.wasm",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "confession-registry": {
+      "contract_id": "CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "source": "xconfess-deployer",
+      "version": "0.1.0",
+      "wasm_file": "target/wasm32-unknown-unknown/release/confession_registry.wasm",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "reputation-badges": {
+      "contract_id": "CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "source": "xconfess-deployer",
+      "version": "0.1.0",
+      "wasm_file": "target/wasm32-unknown-unknown/release/reputation_badges.wasm",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    "anonymous-tipping": {
+      "contract_id": "CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "source": "xconfess-deployer",
+      "version": "0.1.0",
+      "wasm_file": "target/wasm32-unknown-unknown/release/anonymous_tipping.wasm",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    }
+  }
+}
+```
+
+This file is safe to commit because it contains public deployment metadata and a named deployer key alias, not private key material.
+
 **Expected output:**
 
 ```

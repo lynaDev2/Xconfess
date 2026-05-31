@@ -253,64 +253,10 @@ The deploy step writes network metadata to `deployments/<network>.json`, includi
 - crate versions
 - wasm SHA-256 hashes
 
-### Deployment metadata schema
-
-The generated `deployments/<network>.json` contains these top-level fields:
-
-- `generated_at_utc` — UTC timestamp when the file was created
-- `network` — network name passed to `--network`
-- `target` — compilation target used for the WASM artifacts
-- `contracts` — object keyed by crate name
-
-Each contract entry contains:
-
-- `contract_id` — deployed Stellar contract ID
-- `source` — named Stellar CLI key used for deployment
-- `version` — crate version from `Cargo.toml`
-- `wasm_file` — relative path for the deployed WASM artifact
-- `sha256` — SHA-256 hash of the deployed WASM artifact
-
-Example shape:
-
-```json
-{
-  "generated_at_utc": "2026-05-30T12:00:00Z",
-  "network": "testnet",
-  "target": "wasm32-unknown-unknown",
-  "contracts": {
-    "confession-anchor": {
-      "contract_id": "CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      "source": "xconfess-deployer",
-      "version": "0.1.0",
-      "wasm_file": "target/wasm32-unknown-unknown/release/confession_anchor.wasm",
-      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    },
-    "confession-registry": {
-      "contract_id": "CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      "source": "xconfess-deployer",
-      "version": "0.1.0",
-      "wasm_file": "target/wasm32-unknown-unknown/release/confession_registry.wasm",
-      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-    },
-    "reputation-badges": {
-      "contract_id": "CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      "source": "xconfess-deployer",
-      "version": "0.1.0",
-      "wasm_file": "target/wasm32-unknown-unknown/release/reputation_badges.wasm",
-      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
-    },
-    "anonymous-tipping": {
-      "contract_id": "CXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-      "source": "xconfess-deployer",
-      "version": "0.1.0",
-      "wasm_file": "target/wasm32-unknown-unknown/release/anonymous_tipping.wasm",
-      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
-    }
-  }
-}
-```
-
-This file is safe to commit because it contains public deployment metadata and a named deployer key alias, not private key material.
+See [`deployments/README.md`](../deployments/README.md) for the deployment
+metadata naming convention, commit policy, and redacted example. See
+[`docs/contract-release-and-upgrade-runbook.md`](../docs/contract-release-and-upgrade-runbook.md)
+for checksum review and post-deployment verification.
 
 ### Prerequisites for deployment
 
@@ -354,13 +300,20 @@ STELLAR_RPC_URL=https://soroban-testnet.stellar.org
 
 ### Deploy to mainnet
 
+Mainnet deployment is allowed only after the same commit has been deployed and
+verified on testnet. Before running this command, complete the mainnet safety
+gate in
+[`docs/contract-release-and-upgrade-runbook.md`](../docs/contract-release-and-upgrade-runbook.md#mainnet-safety-gate)
+and record approvals from platform, security, and release owners.
+
 ```bash
-./scripts/contracts-release.sh build
-./scripts/contracts-release.sh deploy --network mainnet --source my-mainnet-key
+./scripts/contracts-release.sh deploy --network public --source my-mainnet-key
 ```
 
 > **Warning:** Mainnet deployments are permanent and incur real XLM fees.
-> Always test on testnet first.
+> Keep the previous `deployments/<network>.json` ready for rollback, and use
+> [`docs/contract-signer-rotation-runbook.md`](../docs/contract-signer-rotation-runbook.md)
+> for contracts with pause controls.
 
 ---
 

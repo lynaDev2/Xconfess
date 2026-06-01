@@ -540,6 +540,50 @@ export class AdminController {
     return result;
   }
 
+  @Get('observability')
+  @ApiOperation({ summary: 'Get observability metrics for audit and notification health' })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    example: '2026-05-01',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    example: '2026-05-31',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Aggregated observability metrics for admin review.',
+    schema: {
+      example: {
+        audit: {
+          totalLogs: 128,
+          actionTypeCounts: [
+            { actionType: 'REPORT_RESOLVED', count: 56 },
+            { actionType: 'USER_BANNED', count: 12 },
+          ],
+        },
+        notifications: {
+          main: { active: 5, waiting: 10, failed: 2 },
+          dlq: { failed: 2, waiting: 0, delayed: 0 },
+        },
+        generatedAt: '2026-06-01T12:00:00.000Z',
+      },
+    },
+  })
+  async getObservability(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const start = startDate ? new Date(startDate) : undefined;
+    const end = endDate ? new Date(endDate) : undefined;
+
+    return this.adminService.getObservability(start, end);
+  }
+
   // Audit Logs by requestId (dedicated endpoint for incident reviews)
   @Get('audit-logs/by-request/:requestId')
   async getAuditLogsByRequestId(

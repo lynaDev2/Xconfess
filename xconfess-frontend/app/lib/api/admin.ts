@@ -81,6 +81,26 @@ export interface Analytics {
   };
 }
 
+export interface AdminObservabilityResponse {
+  audit: {
+    totalLogs: number;
+    actionTypeCounts: Array<{ actionType: string; count: number }>;
+  };
+  notifications: {
+    main: {
+      active: number;
+      waiting: number;
+      failed: number;
+    };
+    dlq: {
+      failed: number;
+      waiting: number;
+      delayed: number;
+    };
+  };
+  generatedAt: string;
+}
+
 export const adminApi = {
   // Reports
   getReports: async (params?: {
@@ -173,6 +193,13 @@ export const adminApi = {
       params: { startDate, endDate },
     });
     return response.data;
+  },
+
+  getObservability: async (startDate?: string, endDate?: string) => {
+    const response = await apiClient.get('/api/admin/observability', {
+      params: { startDate, endDate },
+    });
+    return response.data as AdminObservabilityResponse;
   },
 
   // Audit Logs

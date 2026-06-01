@@ -20,6 +20,7 @@ import { WsRolesGuard } from '../auth/guards/ws-roles.guard';
 import { Reflector } from '@nestjs/core';
 import { Tip } from '../tipping/entities/tip.entity';
 import { AuditLogModule } from '../audit-log/audit-log.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AuditLogModule } from '../audit-log/audit-log.module';
     AuthModule,
     UserModule,
     AuditLogModule,
+    NotificationsModule,
   ],
   controllers: [AdminController],
   providers: [

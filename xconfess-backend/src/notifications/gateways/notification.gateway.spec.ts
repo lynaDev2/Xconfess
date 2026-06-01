@@ -189,4 +189,21 @@ describe('Notification websocket auth regression coverage', () => {
       channel: 'user:user-1',
     });
   });
+
+  it('sends notification events only to the authenticated user room', async () => {
+    const { gateway } = createGateway();
+    const roomEmitter = { emit: jest.fn() };
+    gateway.server = {
+      to: jest.fn().mockReturnValue(roomEmitter),
+    } as any;
+    gateway.notificationService.getUserNotifications = jest
+      .fn()
+      .mockResolvedValue({ unreadCount: 3 });
+
+    await gateway.sendNotificationToUser('user-1', { id: 'notif-1' });
+
+    expect(gateway.server.to).toHaveBeenCalledWith('user:user-1');
+    expect(roomEmitter.emit).toHaveBeenCalledWith('new-notification', { id: 'notif-1' });
+    expect(roomEmitter.emit).toHaveBeenCalledWith('unread-count', { count: 3 });
+  });
 });
